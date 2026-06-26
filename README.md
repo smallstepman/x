@@ -143,9 +143,9 @@ The single biggest lever is **how good initial Vth guess is**. The better the gu
 
 - literature synthesis: read papers and other publications, automatically implement firmware changes and debugging scripts, generate test cases for validation, push newly built firmware into plugged in drive and verify paper's results, and then automatically generate a report of the results and keep a dataset of implemented publications and their results for future reference. (implement RAG over the dataset, potentially some ideas are useless solo, but powerful in tandem (something I learned in algo trading) - RAG increases possibility of finding good combos).
 - run `karpathy/autoresearch`-style agentic loops: run simulations for NVMe controllers to maximizes exploration speed and search breadth to autonomously discover optimal fixed-point FTL heuristics, such as advanced garbage collection formulas and predictive L2P cache eviction policies—while operating under strict real-time hardware constraints like limited SRAM and low computational complexity. 
-- put white hat on agent's head and have it run fuzzing loops to find security vulnerabilities in the FTL firmware, or even in the NVMe driver stack. Make it trigger as much of undefined behavior and crashes as possible, have it attempt to set the drive on fire. Basically, increase chances of avoiding this: https://www.tomshardware.com/pc-components/ssds/louis-rossman-threatens-to-take-samsung-to-court-over-dead-4tb-990-pro-ssd-after-ssd-maker-failed-to-replace-the-drive-under-warranty
-- expediate time required to port the code to try out new ASIC architecture, NAND flash gemotery
-- 
+- put white hat on agent's head and have it run fuzzing loops to find security vulnerabilities in the FTL firmware, or even in the NVMe driver stack. Make it trigger as much of undefined behavior and crashes as possible, have it attempt to set the drive on fire. Basically, increase chances of avoiding this: https://www.tomshardware.com/pc-components/ssds/louis-rossman-threatens-to-take-samsung-to-court-over-dead-4tb-990-pro-ssd-after-ssd-maker-failed-to-replace-the-drive-under-warranty .
+- expediate time required to port the code to try out new ASIC architecture, or NAND flash gemotery
+- (and for the sake of connecting back with the given assigment) SRAM-optimized bisection code generation: agent designs the optimal, compact state machine for the pre-algorithm retry sequence. Provide the agent with a physical simulator of NAND cell drift (modeling retention, temperature, and P/E wear) and the strict microcode size limits of the controller’s tightly budgeted instruction cache (I-cache). LLM generates various C/assembly-level implementations of asymmetric binary search sequences. It writes dynamic step-size algorithms that calculate the next $V_{th}$ offset using bitwise shifts and lightweight integer arithmetic rather than floating-point math. The agent compiles the code and runs it against millions of simulated cell-drift distributions. It selects the exact implementation that averages fewer than 2 read attempts across all aging scenarios while ensuring the compiled binary fits into a micro-sized SRAM footprint.
 
 ## Notes on stack 
 
@@ -153,9 +153,9 @@ While I'm not married to these tools, I think it's worth to mention them because
 
 ### **Pi coding agent**
 
-extremely minimal, barebones, no bells and whistles agent harness, that comes with , and instead offers precise control of the initial context window context, and wonderful extension API built on a philosophy of "primitives, not features", which allow to easily tap into: 
+extremely minimal, barebones, no bells and whistles agent harness, that makes it easy to precisly control the contents of the window context (initial and in-flight), and wonderful extension API built on a philosophy of "primitives, not features", which allow to easily tap into: 
   - Context Engineering (intercepting and mutating the LLM prompt history),  
-  - Custom Tools (creating new, schema-validated capabilities) 
+  - Custom Tools (creating new, schema-validated capabilities); _thinking far: a tool that controls industrial robotic arm that pulls out NVMe from M.2 PCIe slot and inserts next one_, or simply a tool that deterministically flashes new FW without going trough CLI
   - TUI Controls (reating interactive user interfaces, forms, and custom status bars in the terminal)
   - Lifecycle Events that can be used to listen to or alter the agent's behavior, e.g.:
     - Session Lifecycle: `session_start` and `session_end` for global setup and teardown.
