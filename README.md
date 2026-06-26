@@ -2,7 +2,7 @@ The optimal $V_{th}$ is a moving target with complex dynamics. It depends on tem
 
 ----
 
-When the FTL fetches raw bits from NAND flash memory, it has **direct visibility into RBER**: the ECC engine counts exactly how many bits in a given code word have been corrupted. The controller obtains RBER (or equivalent ECC statistics) during every read operation. If the RBER for a specific block exceeds a safe threshold (even though the data is still 100% correctable by ECC), the FTL immediately triggers protective procedures:
+When the FTL fetches raw bits from NAND flash memory, it has **direct visibility into RBER**: the ECC engine counts exactly how many bits in a given code word have been corrupted. The controller obtains RBER (or equivalent ECC statistics) during every read operation. If the RBER for a specific block exceeds a safe threshold (even though the data is still 100% correctable by ECC), the FTL can trigger protective procedures:
 
   - **Read Scrubbing**: It copies the data to a new, safe location before the errors become uncorrectable.
   - **Wear Leveling**: It marks the block as suspect or worn and may migrate its data, and updates the mapping tables.
@@ -57,13 +57,13 @@ When the SSD is idle (not actively reading or writing for the host), the FTL con
 
 ### 1. The Development Phase (Silicon Lab Characterization: offline data)
 
-We can use automated NAND Characterization Testers connected to raw NAND wafers and packaged chips. These chips are placed inside climate-controlled thermal chambers and subject the NAND to extreme conditions: writing and erasing blocks thousands of times (P/E cycle acceleration), baking the chips at high temperatures to simulate months of data leakage in hours (Accelerated Retention Loss), and reading the same cells billions of times (Read Disturb simulation). Tester sweeps voltages in tiny increments (e.g., 1mV steps) across the entire voltage range to map out the exact shape of the $V_{th}$ distribution curves. This produces a large dataset showing exactly how cell distributions deform under every permutation of age, temperature, and wear. This dataset i…
+We can use automated NAND Characterization Testers connected to raw NAND wafers and packaged chips. These chips are placed inside climate-controlled thermal chambers and subject the NAND to extreme conditions: writing and erasing blocks thousands of times (P/E cycle acceleration), baking the chips at high temperatures to simulate months of data leakage in hours (Accelerated Retention Loss), and reading the same cells billions of times (Read Disturb simulation). Tester sweeps voltages in tiny increments (e.g., 1mV steps) across the entire voltage range to map out the exact shape of the $V_{th}$ distribution curves. This produces a large dataset showing exactly how cell distributions deform under every permutation of age, temperature, and wear. This dataset is used to train machine learning models and optimize advanced Flash Translation Layer (FTL) management algorithms.
 
 ### 2. The Manufacturing Phase (Accounting for Variations: offline data)
 
 No two silicon wafers are identical. Due to microscopic variations in chemical vapor deposition, etching depth, and lithography, NAND cells in the center of a wafer might behave differently than cells on the outer edge.
 
-During the IC Sorting† and Outgoing Quality Control (OQC) steps at the factory, every single manufactured NAND die undergoes a series of hardware tests. The tester measures the baseline resistance, cell capacitance, and native, out-of-the-box RBER of different sectors of the die. In 3D NAND, vertical channels are etched through hundreds of layers. The geometry of these holes tapers slightly at the bottom. The manufacturing tests acquire data on how much the top layers differ from the bottom layers in performance.
+During the Integrated Circuit Sorting and Outgoing Quality Control (OQC) steps at the factory, every single manufactured NAND die undergoes a series of hardware tests. The tester measures the baseline resistance, cell capacitance, and native, out-of-the-box RBER of different sectors of the die. In 3D NAND, vertical channels are etched through hundreds of layers. The geometry of these holes tapers slightly at the bottom. The manufacturing tests acquire data on how much the top layers differ from the bottom layers in performance.
 
 Instead of running a heavy neural network here, the factory uses the acquired variation data to calculate individual Calibration Matrices (Fuses). These unique calibration coefficients are permanently burned into a special, non-volatile zone of that specific NAND die (often called "OTP" or One-Time Programmable memory). When the SSD controller boots up, its firmware reads these fuses to customize its initial $V_{th}$ calibration tables for the exact silicon variations of that specific drive.
 
@@ -83,19 +83,12 @@ Once the SSD is running in a live system, the FTL acquires data dynamically to m
                 [ ACCURACY ]
   (Low RBER, fewer expensive invocations)
                     /\
-                   /  \
                   /    \
-                 /      \
                 /        \
-               /          \
               /            \
-             /              \
             /                \
-           /                  \
           /                    \
-         /                      \
         /                        \
-       /                          \
       /____________________________\
 [ MEMORY ]                   [ LATENCY ]
 (SRAM/DRAM dies for        (Retry count, CPU time
@@ -140,9 +133,9 @@ The single biggest lever is **how good initial Vth guess is**. The better the gu
 
 ## Use cases
 
-- literature synthesis: read papers and other publications, propose firmware changes and debugging scripts, generate test cases for validation, push newly built firmware into plugged in drive and verify paper's results, and then automatically generate a report of the results and keep a dataset of implemented publications and their results for future reference. (implement RAG over the dataset, potentially some ideas are useless solo, but powerful in tandem (something I learned in algo trading) - RAG increases possibility of finding good combos).
-- run `karpathy/autoresearch`-style agentic loops: run simulations for NVMe controllers to maximize exploration speed and search breadth to autonomously discover optimal fixed-point FTL heuristics, such as advanced garbage collection formulas and predictive L2P cache eviction policies—while operating under strict real-time hardware constraints like limited SRAM and low computational complexity. 
-- put white hat on agent's head and run autonomous fuzzing campaigns to find security vulnerabilities in the FTL firmware, or even in the NVMe driver stack. Make it trigger as much of undefined behavior and crashes as possible, have it attempt to set the drive on fire. Basically, increase chances of avoiding this: https://www.tomshardware.com/pc-components/ssds/louis-rossman-threatens-to-take-samsung-to-court-over-dead-4tb-990-pro-ssd-after-ssd-maker-failed-to-replace-the-drive-under-warranty .
+- Literature synthesis: read papers and other publications, propose firmware changes and debugging scripts, generate test cases for validation, push newly built firmware into plugged in drive and verify paper's results, and then automatically generate a report of the results and keep a dataset of implemented publications and their results for future reference. Implement RAG over the dataset, potentially some ideas are useless solo, but powerful in tandem (something I learned in algo trading) - RAG increases possibility of finding good combos).
+- Run `karpathy/autoresearch`-style agentic loops: run simulations for NVMe controllers to maximize exploration speed and search breadth to autonomously discover optimal fixed-point FTL heuristics, such as advanced garbage collection formulas and predictive L2P cache eviction policies—while operating under strict real-time hardware constraints like limited SRAM and low computational complexity. 
+- Put white hat on agent's head and run autonomous fuzzing campaigns to find security vulnerabilities in the FTL firmware, or even in the NVMe driver stack. Make it trigger as much of undefined behavior and crashes as possible, have it attempt to set the drive on fire. Basically, increase chances of avoiding this: https://www.tomshardware.com/pc-components/ssds/louis-rossman-threatens-to-take-samsung-to-court-over-dead-4tb-990-pro-ssd-after-ssd-maker-failed-to-replace-the-drive-under-warranty .
 - Expedite time required to port the code to try out new ASIC architecture, or NAND flash geometry
 - (and for the sake of connecting back with the given assigment) SRAM-optimized bisection code generation: agent designs the optimal, compact state machine for the pre-algorithm retry sequence. Provide the agent with a physical simulator of NAND cell drift (modeling retention, temperature, and P/E wear) and the strict microcode size limits of the controller’s tightly budgeted instruction cache (I-cache). LLM generates various C/assembly-level implementations of asymmetric binary search sequences. It writes dynamic step-size algorithms that calculate the next $V_{th}$ offset using bitwise shifts and lightweight integer arithmetic rather than floating-point math. The agent compiles the code and runs it against millions of simulated cell-drift distributions. It selects the exact implementation that averages fewer than 2 read attempts across all aging scenarios while ensuring the compiled binary fits into a micro-sized SRAM footprint.
 
@@ -174,11 +167,10 @@ A sandbox, that allows to set security policies, which guards the agent from acc
 
 # Comments 
 
-- see `glossary.md` for the raw braindump or first commit to see the intuitive kind of thinking (some of it was valuable, some of it was primitive)
-- it took me a while to understand the problem space well enough to be able to start asking the right questions to the LLM. While video lectures were helpful initially, they quickly got me lost due to all of the questions that were popping up in my head that they didn't provide answers to immediately. What really helped was starting to be able to mentally map and visualize the traces inside chip. Once that landed, I was able to understand the diagrams and connect with the content in lectures.
+- See `glossary.md` for the raw braindump or first commit to see the intuitive kind of thinking (some of it was valuable, some of it was primitive)
+- It took me a while to understand the problem space well enough to be able to start asking the right questions to the LLM. While video lectures were helpful initially, they quickly got me lost due to all of the questions that were popping up in my head that they didn't provide answers to immediately. What really helped was starting to be able to mentally map and visualize the traces inside chip. Once that landed, I was able to understand the diagrams and connect with the content in lectures.
 - I knew there must be a bisect algorithm involved, but for a few hours I couldn't figure out where was the directionality information coming from, and LLMs were overloading me with information I didn't understand. LLMs also fed me this info initially "you cannot observe the raw bit error rate (RBER) from a normal read" and that statement is technically true from a user-space perspective, but the breakthrough in understanding came when I asked to clarify if this is also true from the FTL perspective. 
-- clearly, no denying, lots of the text here is LLM generated, but nothing is an effect of "one-shotting". The knowledge and understanding was built over several agent and chat sessions by asking several dozen of questions. No part of included markdown documents were ever modified in any shape or form by agent harness. All generated text was manually reviewed before being copied into the document. (and of course well understood and formatted (e.g. to remove all of the "rapid dramatic rigorous test"-kind of wording)). I decided this is better course of action as I will learn more as I go (including right nomenclature), as opposed to forcing my own wording, and have you watching me stumble by e.g. calling ASIC the "ARM CPU" (as I would)
+- Clearly, no denying, lots of the text here is LLM generated, but nothing is an effect of "one-shotting". The knowledge and understanding was built over several agent and chat sessions by asking several dozen of questions. No part of included markdown documents were ever modified in any shape or form by agent harness. All generated text was manually reviewed before being copied into the document. (and of course well understood and formatted (e.g. to remove all of the "rapid dramatic rigorous test"-kind of wording)). I decided this is better course of action as I will learn more as I go (including right nomenclature), as opposed to forcing my own wording, and have you watching me stumble by e.g. calling ASIC the "ARM CPU" (as I would)
   - † in the spirit of transparency, I've put `†` char next to all things I don't understand: https://github.com/search?q=repo%3Asmallstepman%2Fx%20†&type=code
-  - if you are wondering - some of the commit messages are written with GitHub Copilot: today I learnt this feature is auto-enabled when using GitHub UI to edit files anddd commit  
 - I think the ideas for usecases for agentic harness may be looking a bit thin. But I genuinely don't know enough about problem space, and I don't want to paste some vibed ideas... the first 4 are I think decently solid, and the last one does sound reasonable enough to me 
-- obviously, I'm fully aware this document represents a very-very high-level overview/broad-strokes understanding. I honestly didn't know how deep this rabbit hole goes :), this is extremely interesting subject. It also definitely brought some new worries to my life, like "will FTL be able to get uncorrupted data next time I ask my OS to load up binaries for my terminal" 🤣, but of course it will... R-right? 
+- Obviously, I'm fully aware this document represents a very-very high-level overview/broad-strokes understanding. I honestly didn't know how deep this rabbit hole goes :), this is extremely interesting subject. It also definitely brought some new worries to my life, like "will FTL be able to get uncorrupted data next time I ask my OS to load up binaries for my terminal" 🤣, but of course it will... R-right? 
