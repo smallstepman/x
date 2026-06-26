@@ -1,5 +1,3 @@
-# Observations and notes from linked materials and googling and LLMing
-
 Optimal Vth is a moving target with complex dynamics (depends on temperature, charge leakage, read disturb, manufacturing variations, P/E cycles), and the drift is not a simple additive offset
 
 ----
