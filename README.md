@@ -40,9 +40,27 @@ graph TD
     CheckResolution -- No ➔ Bisection Failed --> Fail[<b>Drop to Soft LDPC Read Retry</b>]
 ```
 
-# Data gathering and precomputation
+# Finding optimal \(V_{th}\), \(V_{min}\), \(V_{max}\) inputs for bisect algorithm
 
-  - we can precompute for manufacturing variations 
+The naive approach would be to use last known good values. 
+
+However, we can improve on that by using a more sophisticated approach:
+
+During the development of a new 3D NAND flash drive, trough testing and benchmarking, we can train an Artificial Neural Networks (ANNs) to model how the physical architecture behaves based on inputs such as Program/Erase cycles (wear level), retention time (how long the data has sat unpowered), temperature variations, physical location (the exact word-line layer or column position in the 3D stack, as tapering angles change cell sizes). The neural network maps out an incredibly complex, multi-dimensional prediction of exactly how the \(V_{th}\) distributions will shift under those combined stress factors.
+
+Instead of deploying the raw, resource-heavy neural network into the SSD's micro-controller, engineers distill the neural network’s findings into lightweight mathematical formulas or polynomial regression models.The FTL firmware uses these ML-generated coefficients to proactively adjust the initial search bounds and starting midpoints.
+
+Additionally,
+
+> [!NOTE]
+> and I'd like to point out that I came up with this idea without reading it first ^^ (proof init commit LoC 88)[https://github.com/smallstepman/x/commit/03a61e760c42d4e180fe3ebc6a739a63dfa565d8#diff-b335630551682c19a781afebcf4d07bf978fb1f8ac04c6bf87428ed5106870f5R88]
+
+When the SSD is idle (not actively reading or writing for the host), the FTL controller does have the computational headroom to run more advanced ML algorithms. Many modern enterprise and high-end consumer SSDs execute Active Learning or Reinforcement Learning loops in the background. The FTL will intentionally sample degrading blocks during idle time, track how the \(V_{th}\) behaves, and adjust its internal prediction tables dynamically. This ensures that the drive learns your specific usage patterns (e.g., if you run a very hot server environment or a cold desktop boot environment) and updates its voltage boundaries before you ever request a file.
+
+
+
+
+  - wionalle can precompute for manufacturing variations 
 - we can gather information about previous Vth value that resulted in correct read operation (with timestamp and it's PBA to later be able to determine which neighboring cells could've been affected by the Read Disturb), and other factors like temperature
 - looks like reading BER > 1.1% could be a good candidate for invoking our expensive algorithm
 
