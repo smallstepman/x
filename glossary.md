@@ -1,7 +1,7 @@
 # Neanderthal's Glossary
 
 > [!NOTE]
-> The contents of this section represent my (shamefully coarse and primitive) understanding of the problem space I was able to obtain while learning about how to approach the task. I'm not removing it, because that's the only way for you 🫵 to backtrack where my understanding slipped which might've caused incorrect approach or even wording in attempt to come up with the solution to the presented task. I'm not attaching it for a review, simply because the problem space is massive, and I could dedicate only several hours to it, however if you wish and have time to correct me where LLM couldn't, I'd be grateful.
+> The contents of this section represent my (shamefully coarse and primitive) understanding of the problem space I was able to obtain while learning about how to approach the task. I'm not removing it, because that's the only way for you 🫵 to backtrack where my understanding slipped which might've caused incorrect approach or wording in attempt to come up with the solution to the presented task. I'm not attaching it for a review, simply because the problem space is massive, and I could dedicate only several hours to it, however if you wish and have time to correct me where LLM couldn't, I'd be grateful.
 
 
 - RBER (Raw Bit Error Rate) — measures the number of bit errors present in the raw data read from NAND flash before any ECC correction is applied.
@@ -40,7 +40,7 @@ Sequence (tldr: warm up the bitlines, ping the wordlines, read from matrix and c
       - If its Vth is low == 1 (the transistor opens, creating a path to the 0V ground substrate. The pre-charged voltage on that specific Bitline drains away (Discharge))
       - If its Vth is high == 0 (the transistor remains closed. The pre-charged voltage stays trapped on the Bitline (No Discharge))
 3. Latching Phase (or Data Evaluation Phase) - this is the final step
-    - once the voltage drop on the discharging Bitlines hits a measurable threshold, the Sense Amplifiers isolate themselves from the cell matrix. Internal CMOS differential latches compare the final Bitline voltages against an internal reference voltage to see which columns held their charge and which ones drained. The analog state is instantly converted into digital 0s and 1s and locked into local SRAM cache latches, ready to be sent to the SSD controller over the digital bus.
+    - once the voltage drop on the discharging Bitlines hits a measurable threshold, the Sense Amplifiers isolate themselves from the cell matrix. Internal CMOS differential† latches compare the final Bitline voltages against an internal reference voltage to see which columns held their charge and which ones drained. The analog state is instantly converted into digital 0s and 1s and locked into local SRAM cache latches, ready to be sent to the SSD controller over the digital bus.
 
 ----
 
