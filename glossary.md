@@ -61,4 +61,4 @@ Cells
 ```
 
 
-for data reading, this chart represents 8 possible states, but a programmed cell only one of those peaks would "respond" to to a given voltage and others will remain "silent"
+for data reading, this chart represents 8 possible states, but a programmed cell only "responds" to voltage that targets its peak, and others peaks will remain "silent"
