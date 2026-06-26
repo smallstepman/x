@@ -149,7 +149,7 @@ The single biggest lever is **how good initial Vth guess is**. The better the gu
 
 ## Notes on stack 
 
-While I'm not married to it, I think it's worth to mention these two tools because of the properties they carry:
+While I'm not married to these tools, I think it's worth to mention them because of the properties they carry:
 
 ### **Pi coding agent**
 
