@@ -1,7 +1,7 @@
 # Neanderthal's Glossary
 
 > [!NOTE]
-> The contents of this section represent my (shamefully coarse and primitive) understanding of the problem space I was able to obtain while learning about how to approach the task. I'm not removing it, because that's the only way for you 🫵 to backtrack where my understanding slipped which might've caused incorrect approach or wording in attempt to come up with the solution to the presented task. I'm not attaching it for a review, simply because the problem space is massive, and I could dedicate only several hours to it, however if you wish and have time to correct me where LLM couldn't, I'd be grateful.
+> The contents of this section represent my (shamefully coarse and primitive) understanding of the problem space I was able to obtain while learning about how to approach the task. I'm not removing it, because that's the only way for the reviewer to backtrack where my understanding slipped which might've caused incorrect approach or wording in attempt to come up with the solution to the presented task. I'm not attaching it for a review, simply because the problem space is massive, and I could dedicate only several hours to it, however if you wish and have time to correct me where LLM couldn't, I'd be grateful.
 
 
 - RBER (Raw Bit Error Rate) — measures the number of bit errors present in the raw data read from NAND flash before any ECC correction is applied.
