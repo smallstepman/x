@@ -20,41 +20,24 @@ Using this directional feedback, the firmware runs a mathematical binary bisecti
 
 ```mermaid
 graph TD
-    %% Styling Definition
-    classDef step fill:#f9f9f9,stroke:#333,stroke-width:2px;
-    classDef decision fill:#e1f5fe,stroke:#0288d1,stroke-width:2px;
-    classDef finish fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-
     Start([Trigger Vth Tracking]) --> Step1[<b>Initialize Search Window</b><br>Set initial bounds:<br>V_min = 1.0V, V_max = 1.4V]
     
     %% Loop Entry Point
     Step1 --> CalcMid[<b>Calculate Next Midpoint</b><br>V_test = V_min + V_max / 2]
-    class CalcMid step;
-    
     CalcMid --> ReadPage[<b>Read Page at V_test</b><br>Hardware applies V_test voltage<br>ECC evaluates Bit Flip Asymmetry]
-    class ReadPage step;
-    
     ReadPage --> DecGate{<b>Evaluate Asymmetry</b>}
-    class DecGate decision;
     
     %% Branching Logic
     DecGate -- "Asymmetry ≈ 0<br>(Target Found)" --> Success[<b>Target Located</b><br>Save optimal V_test to SRAM<br>Return data to Host]
-    class Success finish;
-    
     DecGate -- "Excess of 1 ➔ 0 flips<br>(Voltage is too high)" --> AdjustLower[<b>Narrow Window Downward</b><br>Set V_max = V_test]
-    class AdjustLower step;
-    
     DecGate -- "Excess of 0 ➔ 1 flips<br>(Voltage is too low)" --> AdjustHigher[<b>Narrow Window Upward</b><br>Set V_min = V_test]
-    class AdjustHigher step;
     
     %% The Recursive Loop Back
     AdjustLower --> CheckResolution{<b>Is Window Size > Min Step?</b>}
     AdjustHigher --> CheckResolution
-    class CheckResolution decision;
     
     CheckResolution -- Yes ➔ Next Iteration --> CalcMid
     CheckResolution -- No ➔ Bisection Failed --> Fail[<b>Drop to Soft LDPC Read Retry</b>]
-    class Fail fill:#ffebee,stroke:#c62828,stroke-width:2px;
 ```
 
 # Data gathering and precomputation
