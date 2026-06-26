@@ -106,7 +106,11 @@ production cost increases)
 
 Improve one vertex only by sacrificing one or both others. The engineering challenge is finding the Pareto-optimal surface for specific NAND characteristics and target SSD class.
 
-The single biggest lever is **how good your initial Vth guess is**. The better the guess, the fewer retries, the fewer expensive invocations. But getting a good guess requires memory (to store fine-grained state) or compute (to run a model per read) or both.
+The single biggest lever is **how good initial Vth guess is**. The better the guess, the fewer retries, the fewer expensive invocations. But getting a good guess requires memory (to store fine-grained state) or compute (to run a model per read) or both, so:
+- memory buys accuracy
+- offline compute (factory characterization) buys runtime accuracy but trades it for runtime cost (latency)
+- latency tolerance determines retry budget
+- online adaptation is the cheapest upgrade (runs when drive is idle)
 
 ### Knobs 
 
@@ -133,6 +137,41 @@ The single biggest lever is **how good your initial Vth guess is**. The better t
     > | Offline NN + online EWMA residual (your "hybrid") | Same as above | Same | Yes — EWMA tracks deviations from predicted | Coefficients + EWMA state |
     > | Online background learning (your "idle-time RL") | Low | Real-world usage data self-collected | Yes | Model state + replay buffer |
 
+# Using LLMs to automate algorithm development process
+
+### Use cases
+
+- literature synthesis: read papers and other publications, automatically implement firmware changes and debugging scripts, generate test cases for validation, push newly built firmware into plugged in drive and verify paper's results, and then automatically generate a report of the results and keep a dataset of implemented publications and their results for future reference. (implement RAG over the dataset, potentially some ideas are useless solo, but powerful in tandem (something I learned in algo trading) - RAG increases possibility of finding good combos).
+- run `karpathy/autoresearch`-style agentic loops: run simulations for NVMe controllers to maximizes exploration speed and search breadth to autonomously discover optimal fixed-point FTL heuristics, such as advanced garbage collection formulas and predictive L2P cache eviction policies—while operating under strict real-time hardware constraints like limited SRAM and low computational complexity. 
+- put white hat on agent's head and have it run fuzzing loops to find security vulnerabilities in the FTL firmware, or even in the NVMe driver stack. Make it trigger as much of undefined behavior and crashes as possible, have it attempt to set the drive on fire. Basically, increase chances of avoiding this: https://www.tomshardware.com/pc-components/ssds/louis-rossman-threatens-to-take-samsung-to-court-over-dead-4tb-990-pro-ssd-after-ssd-maker-failed-to-replace-the-drive-under-warranty
+- expediate time required to port the code to try out new ASIC architecture, NAND flash gemotery
+- 
+
+### Notes on stack 
+
+While I'm not married to it, I think it's worth to mention these two tools because of the properties they carry:
+
+##### **Pi coding agent**
+
+extremely minimal, barebones, no bells and whistles agent harness, that comes with , and instead offers precise control of the initial context window context, and wonderful extension API built on a philosophy of "primitives, not features", which allow to easily tap into: 
+  - Context Engineering (intercepting and mutating the LLM prompt history),  
+  - Custom Tools (creating new, schema-validated capabilities) 
+  - TUI Controls (reating interactive user interfaces, forms, and custom status bars in the terminal)
+  - Lifecycle Events that can be used to listen to or alter the agent's behavior, e.g.:
+    - Session Lifecycle: `session_start` and `session_end` for global setup and teardown.
+    - Compaction: `session_before_compact` and `session_after_compact` to manage long-term memory before the chat history shrinks.
+    - Turn Lifecycle: `turn_start`, `llm_request_prepare` (for RAG/prompt injection), `llm_response_stream`, `turn_end`.
+    - Tool Execution: `tool_call` (critical for creating security guardrails against dangerous commands) and `tool_result` (for sanitizing outputs).
+
+This enables development of guided loops, where for example, agent can't "forget" to create subagent that will update the database with experiment run results after running 
+```shell
+$ bench-suite --device XYZ --firmware 123.bin
+```
+because the agent's behavior after `tool_result` event is triggered, is guardrailed by extension's code. 
+
+##### **http://nono.sh**
+
+A sandbox, that allows to set security policies, which guards the agent from accessing filesystem and executing unwanted commands. Crucial if agent has internet access (context injection hack). The primary advantage of `nono` is its utilization of kernel-level sandboxing rather than virtualization; because the agent executes within the native user-space, it maintains predictable, direct access to PCIe devices without the overhead of virtualization passthrough.
 
 # Comments 
 
