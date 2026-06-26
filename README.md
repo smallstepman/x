@@ -139,7 +139,7 @@ The single biggest lever is **how good initial Vth guess is**. The better the gu
 
 # Using LLMs to automate algorithm development process
 
-### Use cases
+## Use cases
 
 - literature synthesis: read papers and other publications, automatically implement firmware changes and debugging scripts, generate test cases for validation, push newly built firmware into plugged in drive and verify paper's results, and then automatically generate a report of the results and keep a dataset of implemented publications and their results for future reference. (implement RAG over the dataset, potentially some ideas are useless solo, but powerful in tandem (something I learned in algo trading) - RAG increases possibility of finding good combos).
 - run `karpathy/autoresearch`-style agentic loops: run simulations for NVMe controllers to maximizes exploration speed and search breadth to autonomously discover optimal fixed-point FTL heuristics, such as advanced garbage collection formulas and predictive L2P cache eviction policies—while operating under strict real-time hardware constraints like limited SRAM and low computational complexity. 
@@ -147,11 +147,11 @@ The single biggest lever is **how good initial Vth guess is**. The better the gu
 - expediate time required to port the code to try out new ASIC architecture, NAND flash gemotery
 - 
 
-### Notes on stack 
+## Notes on stack 
 
 While I'm not married to it, I think it's worth to mention these two tools because of the properties they carry:
 
-##### **Pi coding agent**
+### **Pi coding agent**
 
 extremely minimal, barebones, no bells and whistles agent harness, that comes with , and instead offers precise control of the initial context window context, and wonderful extension API built on a philosophy of "primitives, not features", which allow to easily tap into: 
   - Context Engineering (intercepting and mutating the LLM prompt history),  
@@ -169,7 +169,7 @@ $ bench-suite --device XYZ --firmware 123.bin
 ```
 because the agent's behavior after `tool_result` event is triggered, is guardrailed by extension's code. 
 
-##### **http://nono.sh**
+### **http://nono.sh**
 
 A sandbox, that allows to set security policies, which guards the agent from accessing filesystem and executing unwanted commands. Crucial if agent has internet access (context injection hack). The primary advantage of `nono` is its utilization of kernel-level sandboxing rather than virtualization; because the agent executes within the native user-space, it maintains predictable, direct access to PCIe devices without the overhead of virtualization passthrough.
 
